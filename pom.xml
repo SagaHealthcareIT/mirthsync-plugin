@@ -50,7 +50,6 @@
         <maven-processor-plugin.version>5.1</maven-processor-plugin.version>
         <maven-assembly-plugin.version>3.7.1</maven-assembly-plugin.version>
         <mirth-plugin-maven-plugin.version>3.0.0</mirth-plugin-maven-plugin.version>
-        <lombok.version>1.18.32</lombok.version>
         <miglayout.version>3.7.4</miglayout.version>
         <saga.runtime.artifacts>clj-http,clj-jgit,clj-tuple,environ,org.eclipse.jgit,org.eclipse.jgit.gpg.bc,org.eclipse.jgit.ssh.apache,potemkin,riddley,slingshot,JavaEWAH,eddsa,httpasyncclient,httpclient-cache,httpcore-nio,sshd-osgi,sshd-sftp,bcpg-jdk18on,clojure,core.specs.alpha,data.xml,data.zip,spec.alpha,tools.cli,tools.logging,incomplete,mirthsync</saga.runtime.artifacts>
 
@@ -99,13 +98,6 @@
             <groupId>com.mirth.connect</groupId>
             <artifactId>mirth-server</artifactId>
             <version>${mirth.version}</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>${lombok.version}</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
