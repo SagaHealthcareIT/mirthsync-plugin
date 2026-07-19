@@ -1,7 +1,7 @@
 # MirthSync Plugin for Mirth Connect
 
 This repository contains Saga-IT's **MirthSync** plugin for [Mirth / NextGen Connect](https://github.com/nextgenhealthcare/connect).  
-The plugin embeds the [`mirthsync`](https://github.com/saga-it/mirthsync) CLI so administrators can pull, push, and inspect channel configuration from within the Mirth Administrator UI or directly on the server.
+The plugin embeds the [`mirthsync`](https://github.com/SagaHealthcareIT/mirthsync) CLI so administrators can pull, push, and inspect channel configuration from within the Mirth Administrator UI or directly on the server.
 
 Key capabilities:
 
@@ -46,8 +46,8 @@ The plugin depends on [`com.saga-it:mirthsync`](https://clojars.org/com.saga-it/
 ## Building Locally
 
 ```bash
-git clone https://github.com/saga-it/mirthsync-mirth-plugin.git
-cd mirthsync-mirth-plugin
+git clone https://github.com/SagaHealthcareIT/mirthsync-plugin.git
+cd mirthsync-plugin
 ./build.sh
 ```
 
@@ -132,6 +132,16 @@ The GitHub Action will attach the installable zip to that release automatically.
 - The build script signs jars with the self-signed keystore in `certificate/` for local development. Official release signing is handled externally after the CI build.
 - When adding dependencies that must ship with the plugin (e.g., new clojure libs), drop them into `libs/runtime/{client|shared}` so the build script can bundle and sign them.
 - Remember that Mirth’s Jersey stack serializes via XStream/MOXy. Avoid immutable Java collections or custom DTOs unless you register converters; we stick to primitives and `ArrayList`/`LinkedHashMap`.
+
+---
+
+## About & Commercial Support
+
+The MirthSync plugin is built and maintained by [Saga IT, LLC](https://saga-it.com). For hands-on help:
+
+- [Mirth Connect consulting & development](https://saga-it.com/services/mirth-connect)
+- [Open Integration Engine (OIE) services](https://saga-it.com/services/open-integration-engine)
+- [mirthsync CLI](https://github.com/SagaHealthcareIT/mirthsync) and the [VS Code extension](https://saga-it.com/products/mirthsync-vscode)
 
 ---
 
