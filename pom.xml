@@ -23,7 +23,7 @@
 
     <groupId>com.saga-it</groupId>
     <artifactId>mirthsync-plugin</artifactId>
-    <version>0.0.3</version>
+    <version>0.0.4</version>
     <packaging>pom</packaging>
 
     <licenses>
@@ -55,7 +55,7 @@
 
         <!-- Plugin details -->
         <mirth.plugin.author>Saga IT, LLC</mirth.plugin.author>
-        <mirth.plugin.compatible_versions>4.5.2</mirth.plugin.compatible_versions>
+        <mirth.plugin.compatible_versions>4.5.2,4.6.0</mirth.plugin.compatible_versions>
         <mirth.plugin.description>MirthSync Git integration plugin by Saga IT, LLC.</mirth.plugin.description>
         <mirth.plugin.name>MirthSync Plugin</mirth.plugin.name>
         <mirth.plugin.path>mirthsync-plugin</mirth.plugin.path>
