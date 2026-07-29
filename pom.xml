@@ -26,6 +26,12 @@
     <version>0.0.4</version>
     <packaging>pom</packaging>
 
+    <url>https://saga-it.com/products/mirthsync-plugin</url>
+    <organization>
+        <name>Saga IT, LLC</name>
+        <url>https://saga-it.com</url>
+    </organization>
+
     <licenses>
         <license>
             <name>Apache License, Version 2.0</name>
