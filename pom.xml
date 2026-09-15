@@ -23,7 +23,7 @@
 
     <groupId>com.saga-it</groupId>
     <artifactId>mirthsync-plugin</artifactId>
-    <version>0.0.4</version>
+    <version>0.0.5</version>
     <packaging>pom</packaging>
 
     <url>https://saga-it.com/products/mirthsync-plugin</url>
