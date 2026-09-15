@@ -37,6 +37,7 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
+import java.awt.event.ItemEvent;
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -81,6 +82,8 @@ public class MainSettingsPanel extends AbstractSettingsPanel {
     private MirthCheckBox skipDisabledCheckbox;
     private MirthCheckBox deployCheckbox;
     private MirthCheckBox deployAllCheckbox;
+    private MirthCheckBox deployChangedCheckbox;
+    private MirthCheckBox deployNewCheckbox;
     private MirthCheckBox interactiveCheckbox;
     private MirthCheckBox autoCommitCheckbox;
     private MirthCheckBox gitInitCheckbox;
@@ -119,6 +122,8 @@ public class MainSettingsPanel extends AbstractSettingsPanel {
             Keys.SKIP_DISABLED,
             Keys.DEPLOY,
             Keys.DEPLOY_ALL,
+            Keys.DEPLOY_CHANGED,
+            Keys.DEPLOY_NEW,
             Keys.INTERACTIVE,
             Keys.AUTO_COMMIT,
             Keys.GIT_INIT,
@@ -300,6 +305,10 @@ public class MainSettingsPanel extends AbstractSettingsPanel {
         skipDisabledCheckbox = createCheckBox("Skip disabled channels");
         deployCheckbox = createCheckBox("Deploy channels after push");
         deployAllCheckbox = createCheckBox("Deploy all together");
+        deployChangedCheckbox = createCheckBox("Deploy only changed channels");
+        deployChangedCheckbox.setToolTipText("After the push, deploy only channels the server reports as changed (--deploy-changed). Clears the other deploy options.");
+        deployNewCheckbox = createCheckBox("Also deploy new channels");
+        deployNewCheckbox.setToolTipText("With \"Deploy only changed channels\": also deploy pushed channels that are not currently deployed (--deploy-new).");
         interactiveCheckbox = createCheckBox("Allow interactive prompts");
         autoCommitCheckbox = createCheckBox("Auto commit after operations");
         gitInitCheckbox = createCheckBox("Initialise git repository if missing");
@@ -309,6 +318,30 @@ public class MainSettingsPanel extends AbstractSettingsPanel {
         registerCheckboxListener(skipDisabledCheckbox);
         registerCheckboxListener(deployCheckbox);
         registerCheckboxListener(deployAllCheckbox);
+        registerCheckboxListener(deployChangedCheckbox);
+        registerCheckboxListener(deployNewCheckbox);
+        // "Only changed" cannot be honoured alongside the other two deploy
+        // modes (mirthsync runs both and warns), so ticking one side clears
+        // the other. ItemListeners also fire on programmatic setSelected, so
+        // preset restore and properties load stay consistent without extra calls.
+        deployChangedCheckbox.addItemListener(e -> {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                deployCheckbox.setSelected(false);
+                deployAllCheckbox.setSelected(false);
+            }
+            syncDeployNewEnabled();
+        });
+        deployCheckbox.addItemListener(e -> {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                deployChangedCheckbox.setSelected(false);
+            }
+        });
+        deployAllCheckbox.addItemListener(e -> {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                deployChangedCheckbox.setSelected(false);
+            }
+        });
+        syncDeployNewEnabled();
         registerCheckboxListener(interactiveCheckbox);
         registerCheckboxListener(autoCommitCheckbox);
         registerCheckboxListener(gitInitCheckbox);
@@ -329,6 +362,9 @@ public class MainSettingsPanel extends AbstractSettingsPanel {
 
         panel.add(deployAllCheckbox, "growx");
         panel.add(interactivePanel, "growx, wrap");
+
+        panel.add(deployChangedCheckbox, "growx");
+        panel.add(deployNewCheckbox, "growx, wrap");
 
         panel.add(autoCommitCheckbox, "growx");
         panel.add(gitInitCheckbox, "growx, wrap");
@@ -594,6 +630,19 @@ public class MainSettingsPanel extends AbstractSettingsPanel {
         defaultPresets.put("Git: diff --cached (client)", gitDiffStagedClient);
     }
 
+    /**
+     * --deploy-new only means something with --deploy-changed (mirthsync warns
+     * and ignores it otherwise). Clearing it when disabled keeps what is
+     * persisted equal to what the panel shows.
+     */
+    private void syncDeployNewEnabled() {
+        boolean enabled = deployChangedCheckbox.isSelected();
+        deployNewCheckbox.setEnabled(enabled);
+        if (!enabled) {
+            deployNewCheckbox.setSelected(false);
+        }
+    }
+
     private Map<String, String> createEmptyPreset() {
         Map<String, String> preset = new LinkedHashMap<>();
         preset.put(Keys.SERVER_URL, "");
@@ -609,6 +658,8 @@ public class MainSettingsPanel extends AbstractSettingsPanel {
         preset.put(Keys.SKIP_DISABLED, Boolean.FALSE.toString());
         preset.put(Keys.DEPLOY, Boolean.FALSE.toString());
         preset.put(Keys.DEPLOY_ALL, Boolean.FALSE.toString());
+        preset.put(Keys.DEPLOY_CHANGED, Boolean.FALSE.toString());
+        preset.put(Keys.DEPLOY_NEW, Boolean.FALSE.toString());
         preset.put(Keys.INTERACTIVE, Boolean.FALSE.toString());
         preset.put(Keys.AUTO_COMMIT, Boolean.FALSE.toString());
         preset.put(Keys.GIT_INIT, Boolean.FALSE.toString());
@@ -893,6 +944,8 @@ public class MainSettingsPanel extends AbstractSettingsPanel {
         snapshot.put(Keys.SKIP_DISABLED, Boolean.toString(skipDisabledCheckbox.isSelected()));
         snapshot.put(Keys.DEPLOY, Boolean.toString(deployCheckbox.isSelected()));
         snapshot.put(Keys.DEPLOY_ALL, Boolean.toString(deployAllCheckbox.isSelected()));
+        snapshot.put(Keys.DEPLOY_CHANGED, Boolean.toString(deployChangedCheckbox.isSelected()));
+        snapshot.put(Keys.DEPLOY_NEW, Boolean.toString(deployNewCheckbox.isSelected()));
         snapshot.put(Keys.INTERACTIVE, Boolean.toString(interactiveCheckbox.isSelected()));
         snapshot.put(Keys.AUTO_COMMIT, Boolean.toString(autoCommitCheckbox.isSelected()));
         snapshot.put(Keys.GIT_INIT, Boolean.toString(gitInitCheckbox.isSelected()));
@@ -952,6 +1005,9 @@ public class MainSettingsPanel extends AbstractSettingsPanel {
             skipDisabledCheckbox.setSelected(Boolean.parseBoolean(preset.getOrDefault(Keys.SKIP_DISABLED, "false")));
             deployCheckbox.setSelected(Boolean.parseBoolean(preset.getOrDefault(Keys.DEPLOY, "false")));
             deployAllCheckbox.setSelected(Boolean.parseBoolean(preset.getOrDefault(Keys.DEPLOY_ALL, "false")));
+            deployChangedCheckbox.setSelected(Boolean.parseBoolean(preset.getOrDefault(Keys.DEPLOY_CHANGED, "false")));
+            deployNewCheckbox.setSelected(Boolean.parseBoolean(preset.getOrDefault(Keys.DEPLOY_NEW, "false")));
+            syncDeployNewEnabled();
             interactiveCheckbox.setSelected(Boolean.parseBoolean(preset.getOrDefault(Keys.INTERACTIVE, "false")));
             autoCommitCheckbox.setSelected(Boolean.parseBoolean(preset.getOrDefault(Keys.AUTO_COMMIT, "false")));
             gitInitCheckbox.setSelected(Boolean.parseBoolean(preset.getOrDefault(Keys.GIT_INIT, "false")));
@@ -1291,6 +1347,8 @@ public class MainSettingsPanel extends AbstractSettingsPanel {
         addFlag(args, skipDisabledCheckbox.isSelected(), "--skip-disabled");
         addFlag(args, deployCheckbox.isSelected(), "--deploy");
         addFlag(args, deployAllCheckbox.isSelected(), "--deploy-all");
+        addFlag(args, deployChangedCheckbox.isSelected(), "--deploy-changed");
+        addFlag(args, deployChangedCheckbox.isSelected() && deployNewCheckbox.isSelected(), "--deploy-new");
         addFlag(args, interactiveCheckbox.isSelected(), "--interactive");
         addOption(args, "--commit-message", textOrNull(commitMessageField));
         addOption(args, "--git-author", textOrNull(gitAuthorField));
@@ -1796,6 +1854,8 @@ public class MainSettingsPanel extends AbstractSettingsPanel {
         static final String SKIP_DISABLED = "skipDisabled";
         static final String DEPLOY = "deploy";
         static final String DEPLOY_ALL = "deployAll";
+        static final String DEPLOY_CHANGED = "deployChanged";
+        static final String DEPLOY_NEW = "deployNew";
         static final String INTERACTIVE = "interactive";
         static final String AUTO_COMMIT = "autoCommit";
         static final String GIT_INIT = "gitInit";
@@ -2082,6 +2142,9 @@ public class MainSettingsPanel extends AbstractSettingsPanel {
         skipDisabledCheckbox.setSelected(Boolean.parseBoolean(properties.getProperty(Keys.SKIP_DISABLED, "false")));
         deployCheckbox.setSelected(Boolean.parseBoolean(properties.getProperty(Keys.DEPLOY, "false")));
         deployAllCheckbox.setSelected(Boolean.parseBoolean(properties.getProperty(Keys.DEPLOY_ALL, "false")));
+        deployChangedCheckbox.setSelected(Boolean.parseBoolean(properties.getProperty(Keys.DEPLOY_CHANGED, "false")));
+        deployNewCheckbox.setSelected(Boolean.parseBoolean(properties.getProperty(Keys.DEPLOY_NEW, "false")));
+        syncDeployNewEnabled();
         interactiveCheckbox.setSelected(Boolean.parseBoolean(properties.getProperty(Keys.INTERACTIVE, "false")));
         autoCommitCheckbox.setSelected(Boolean.parseBoolean(properties.getProperty(Keys.AUTO_COMMIT, "false")));
         gitInitCheckbox.setSelected(Boolean.parseBoolean(properties.getProperty(Keys.GIT_INIT, "false")));
@@ -2133,6 +2196,8 @@ public class MainSettingsPanel extends AbstractSettingsPanel {
         properties.setProperty(Keys.SKIP_DISABLED, Boolean.toString(skipDisabledCheckbox.isSelected()));
         properties.setProperty(Keys.DEPLOY, Boolean.toString(deployCheckbox.isSelected()));
         properties.setProperty(Keys.DEPLOY_ALL, Boolean.toString(deployAllCheckbox.isSelected()));
+        properties.setProperty(Keys.DEPLOY_CHANGED, Boolean.toString(deployChangedCheckbox.isSelected()));
+        properties.setProperty(Keys.DEPLOY_NEW, Boolean.toString(deployNewCheckbox.isSelected()));
         properties.setProperty(Keys.INTERACTIVE, Boolean.toString(interactiveCheckbox.isSelected()));
         properties.setProperty(Keys.AUTO_COMMIT, Boolean.toString(autoCommitCheckbox.isSelected()));
         properties.setProperty(Keys.GIT_INIT, Boolean.toString(gitInitCheckbox.isSelected()));
