@@ -88,6 +88,7 @@ public class MainSettingsPanel extends AbstractSettingsPanel {
     private MirthCheckBox autoCommitCheckbox;
     private MirthCheckBox gitInitCheckbox;
     private MirthCheckBox deleteOrphanedCheckbox;
+    private MirthCheckBox sortUnorderedCheckbox;
 
     private MirthTextField commitMessageField;
     private MirthTextField gitAuthorField;
@@ -128,6 +129,7 @@ public class MainSettingsPanel extends AbstractSettingsPanel {
             Keys.AUTO_COMMIT,
             Keys.GIT_INIT,
             Keys.DELETE_ORPHANED,
+            Keys.SORT_UNORDERED,
             Keys.COMMIT_MESSAGE,
             Keys.GIT_AUTHOR,
             Keys.GIT_EMAIL,
@@ -313,6 +315,9 @@ public class MainSettingsPanel extends AbstractSettingsPanel {
         autoCommitCheckbox = createCheckBox("Auto commit after operations");
         gitInitCheckbox = createCheckBox("Initialise git repository if missing");
         deleteOrphanedCheckbox = createCheckBox("Delete orphaned files on pull");
+        sortUnorderedCheckbox = createCheckBox("Sort unordered collections");
+        sortUnorderedCheckbox.setSelected(true);
+        sortUnorderedCheckbox.setToolTipText("On pull, sort collections Mirth stores in no fixed order so the XML stays stable and diffs stay clean. Uncheck to keep the server's order (--no-sort-unordered).");
         registerCheckboxListener(forceCheckbox);
         registerCheckboxListener(includeConfigurationMapCheckbox);
         registerCheckboxListener(skipDisabledCheckbox);
@@ -346,6 +351,7 @@ public class MainSettingsPanel extends AbstractSettingsPanel {
         registerCheckboxListener(autoCommitCheckbox);
         registerCheckboxListener(gitInitCheckbox);
         registerCheckboxListener(deleteOrphanedCheckbox);
+        registerCheckboxListener(sortUnorderedCheckbox);
 
         panel.add(forceCheckbox, "growx");
         panel.add(includeConfigurationMapCheckbox, "growx, wrap");
@@ -370,6 +376,7 @@ public class MainSettingsPanel extends AbstractSettingsPanel {
         panel.add(gitInitCheckbox, "growx, wrap");
 
         panel.add(deleteOrphanedCheckbox, "growx");
+        panel.add(sortUnorderedCheckbox, "growx, wrap");
 
         return panel;
     }
@@ -664,6 +671,7 @@ public class MainSettingsPanel extends AbstractSettingsPanel {
         preset.put(Keys.AUTO_COMMIT, Boolean.FALSE.toString());
         preset.put(Keys.GIT_INIT, Boolean.FALSE.toString());
         preset.put(Keys.DELETE_ORPHANED, Boolean.FALSE.toString());
+        preset.put(Keys.SORT_UNORDERED, Boolean.TRUE.toString());
         preset.put(Keys.COMMIT_MESSAGE, "mirthsync commit");
         preset.put(Keys.GIT_AUTHOR, "");
         preset.put(Keys.GIT_EMAIL, "");
@@ -950,6 +958,7 @@ public class MainSettingsPanel extends AbstractSettingsPanel {
         snapshot.put(Keys.AUTO_COMMIT, Boolean.toString(autoCommitCheckbox.isSelected()));
         snapshot.put(Keys.GIT_INIT, Boolean.toString(gitInitCheckbox.isSelected()));
         snapshot.put(Keys.DELETE_ORPHANED, Boolean.toString(deleteOrphanedCheckbox.isSelected()));
+        snapshot.put(Keys.SORT_UNORDERED, Boolean.toString(sortUnorderedCheckbox.isSelected()));
         snapshot.put(Keys.COMMIT_MESSAGE, textOrEmpty(commitMessageField));
         snapshot.put(Keys.GIT_AUTHOR, textOrEmpty(gitAuthorField));
         snapshot.put(Keys.GIT_EMAIL, textOrEmpty(gitEmailField));
@@ -1012,6 +1021,7 @@ public class MainSettingsPanel extends AbstractSettingsPanel {
             autoCommitCheckbox.setSelected(Boolean.parseBoolean(preset.getOrDefault(Keys.AUTO_COMMIT, "false")));
             gitInitCheckbox.setSelected(Boolean.parseBoolean(preset.getOrDefault(Keys.GIT_INIT, "false")));
             deleteOrphanedCheckbox.setSelected(Boolean.parseBoolean(preset.getOrDefault(Keys.DELETE_ORPHANED, "false")));
+            sortUnorderedCheckbox.setSelected(parseBooleanOrDefault(preset.get(Keys.SORT_UNORDERED), true));
 
             commitMessageField.setText(preset.getOrDefault(Keys.COMMIT_MESSAGE, "mirthsync commit"));
 
@@ -1030,6 +1040,18 @@ public class MainSettingsPanel extends AbstractSettingsPanel {
         }
 
         setSaveEnabled(true);
+    }
+
+    /**
+     * For settings added after presets/properties were first saved: a missing
+     * key, or the blank value serializePresetValues writes for one, means the
+     * default rather than false.
+     */
+    private boolean parseBooleanOrDefault(String value, boolean defaultValue) {
+        if (isBlank(value)) {
+            return defaultValue;
+        }
+        return Boolean.parseBoolean(value.trim());
     }
 
     private int parseIntOrDefault(String value, int defaultValue) {
@@ -1356,6 +1378,8 @@ public class MainSettingsPanel extends AbstractSettingsPanel {
         addFlag(args, autoCommitCheckbox.isSelected(), "--auto-commit");
         addFlag(args, gitInitCheckbox.isSelected(), "--git-init");
         addFlag(args, deleteOrphanedCheckbox.isSelected(), "--delete-orphaned");
+        // Sorting is mirthsync's default (3.8.0+), so only the opt-out is passed.
+        addFlag(args, !sortUnorderedCheckbox.isSelected(), "--no-sort-unordered");
 
         args.add(actionOption.getCliValue());
 
@@ -1860,6 +1884,7 @@ public class MainSettingsPanel extends AbstractSettingsPanel {
         static final String AUTO_COMMIT = "autoCommit";
         static final String GIT_INIT = "gitInit";
         static final String DELETE_ORPHANED = "deleteOrphaned";
+        static final String SORT_UNORDERED = "sortUnordered";
         static final String COMMIT_MESSAGE = "commitMessage";
         static final String GIT_AUTHOR = "gitAuthor";
         static final String GIT_EMAIL = "gitEmail";
@@ -2149,6 +2174,7 @@ public class MainSettingsPanel extends AbstractSettingsPanel {
         autoCommitCheckbox.setSelected(Boolean.parseBoolean(properties.getProperty(Keys.AUTO_COMMIT, "false")));
         gitInitCheckbox.setSelected(Boolean.parseBoolean(properties.getProperty(Keys.GIT_INIT, "false")));
         deleteOrphanedCheckbox.setSelected(Boolean.parseBoolean(properties.getProperty(Keys.DELETE_ORPHANED, "false")));
+        sortUnorderedCheckbox.setSelected(parseBooleanOrDefault(properties.getProperty(Keys.SORT_UNORDERED), true));
 
         commitMessageField.setText(properties.getProperty(Keys.COMMIT_MESSAGE, "mirthsync commit"));
         gitAuthorField.setText(properties.getProperty(Keys.GIT_AUTHOR, ""));
@@ -2202,6 +2228,7 @@ public class MainSettingsPanel extends AbstractSettingsPanel {
         properties.setProperty(Keys.AUTO_COMMIT, Boolean.toString(autoCommitCheckbox.isSelected()));
         properties.setProperty(Keys.GIT_INIT, Boolean.toString(gitInitCheckbox.isSelected()));
         properties.setProperty(Keys.DELETE_ORPHANED, Boolean.toString(deleteOrphanedCheckbox.isSelected()));
+        properties.setProperty(Keys.SORT_UNORDERED, Boolean.toString(sortUnorderedCheckbox.isSelected()));
 
         properties.setProperty(Keys.COMMIT_MESSAGE, textOrEmpty(commitMessageField));
         properties.setProperty(Keys.GIT_AUTHOR, textOrEmpty(gitAuthorField));
