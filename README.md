@@ -36,7 +36,7 @@ External runtime libraries (including mirthsync) are copied to `mirthsync-plugin
 - **Java 17** (Temurin/Adoptium recommended)
 - **Maven 3.9+**
 - **Git**
-- Access to a Mirth Connect or Open Integration Engine 4.5.2 or 4.6.0 environment (the exact versions listed in `mirth.plugin.compatible_versions` in `pom.xml`)
+- Access to a Mirth Connect or Open Integration Engine 4.5.2, 4.6.0 or 4.7.0 environment (the exact versions listed in `mirth.plugin.compatible_versions` in `pom.xml`)
 - Optional: custom signing certificate/keystore (default self-signed cert lives in `certificate/keystore.jks`; password is `storepass` and alias `selfsigned`)
 
 The plugin depends on [`com.saga-it:mirthsync`](https://clojars.org/com.saga-it/mirthsync), which is published on [Clojars](https://clojars.org) and resolved automatically during the Maven build. The embedded CLI version is pinned in `server/pom.xml` and `client/pom.xml` (currently **3.7.0**); bump both together, and publish that mirthsync release to Clojars first.
