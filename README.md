@@ -39,7 +39,7 @@ External runtime libraries (including mirthsync) are copied to `mirthsync-plugin
 - Access to a Mirth Connect or Open Integration Engine 4.5.2, 4.6.0 or 4.7.0 environment (the exact versions listed in `mirth.plugin.compatible_versions` in `pom.xml`)
 - Optional: custom signing certificate/keystore (default self-signed cert lives in `certificate/keystore.jks`; password is `storepass` and alias `selfsigned`)
 
-The plugin depends on [`com.saga-it:mirthsync`](https://clojars.org/com.saga-it/mirthsync), which is published on [Clojars](https://clojars.org) and resolved automatically during the Maven build. The embedded CLI version is pinned in `server/pom.xml` and `client/pom.xml` (currently **3.8.1**); bump both together, and publish that mirthsync release to Clojars first.
+The plugin depends on [`com.saga-it:mirthsync`](https://clojars.org/com.saga-it/mirthsync), which is published on [Clojars](https://clojars.org) and resolved automatically during the Maven build. The embedded CLI version is pinned in `server/pom.xml` and `client/pom.xml` (currently **3.9.0**); bump both together, and publish that mirthsync release to Clojars first.
 
 ---
 
@@ -97,6 +97,11 @@ From **Settings → MirthSync** inside the Administrator UI:
   - Deploy after push: “Deploy channels after push” (`--deploy`), “Deploy all together” (`--deploy-all`), “Deploy only changed channels” (`--deploy-changed`, mirthsync 3.7.0+) and, with it, “Also deploy new channels” (`--deploy-new`).  
   - “Sort unordered collections” (on by default, mirthsync 3.8.0+): on pull, sorts collections Mirth stores in no fixed order (code template context types, library/alert channel IDs, the configuration map, etc.) so pulled XML stays stable and diffs stay clean. Uncheck it to keep the server's order (`--no-sort-unordered`). Expect a one-time commit that only reorders elements the first time you pull with “Force overwrite” checked after upgrading; without it, a pull does not overwrite existing files.  
   - “Allow interactive prompts” is currently disabled with a tooltip (“Currently unsupported”).
+
+- **Upgrading to plugin 0.0.7 (mirthsync 3.9.0)**  
+  - mirthsync 3.9.0 encodes more characters in file and folder names so that a target directory works on Windows: `%` and `" * : < > ? |` are percent encoded (for example `:` becomes `%3A`), and Windows device names such as `AUX` have their last character encoded. Names without these characters are unchanged. See [Upgrading to 3.9.0](https://github.com/SagaHealthcareIT/mirthsync#upgrading-to-390) in the mirthsync README.
+  - In each target directory, push any changes made with the older plugin first. Then run one pull with “Force overwrite” and “Delete orphaned files on pull” both checked, review the result and commit it. A pull without “Force overwrite” keeps the old files next to the new ones.
+  - Update saved presets whose “Restrict to path” names an affected item to the new names. `-r` now takes only the item it names, and mirthsync warns when it matches nothing.
 
 - **Git Metadata & Commands**  
   - Git author/email pre-filled from the current Mirth user and cannot be toggled read-only (per design).  

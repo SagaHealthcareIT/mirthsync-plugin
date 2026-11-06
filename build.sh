@@ -163,6 +163,9 @@ echo
 echo "   Packaging plugin..."
 echo
 echo "########################################"
+# zip updates an existing archive in place and never drops entries, so a
+# stale jar from an earlier local build would ride along. Start fresh.
+rm -f "$PLUGIN_PATH.zip"
 zip -r $PLUGIN_PATH "$PLUGIN_PATH"
 
 rm -rf "$PLUGIN_PATH"

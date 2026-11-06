@@ -258,7 +258,8 @@ public class MainSettingsPanel extends AbstractSettingsPanel {
 
         restrictPathField = new MirthTextField();
         restrictPathField.setColumns(30);
-        restrictPathField.setToolTipText("Optional relative path inside the target directory to limit push scope.");
+        restrictPathField.setToolTipText("<html>Optional path inside the target directory that limits the pull or push.<br>"
+                + "Use the names on disk: mirthsync 3.9.0 encodes some characters, for example ':' as %3A.</html>");
         registerDocumentListener(restrictPathField);
 
         verbositySpinner = new JSpinner(new SpinnerNumberModel(0, 0, 5, 1));
