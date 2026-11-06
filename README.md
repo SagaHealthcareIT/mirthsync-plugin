@@ -99,9 +99,12 @@ From **Settings → MirthSync** inside the Administrator UI:
   - “Allow interactive prompts” is currently disabled with a tooltip (“Currently unsupported”).
 
 - **Upgrading to plugin 0.0.7 (mirthsync 3.9.0)**  
-  - mirthsync 3.9.0 encodes more characters in file and folder names so that a target directory works on Windows: `%` and `" * : < > ? |` are percent encoded (for example `:` becomes `%3A`), and Windows device names such as `AUX` have their last character encoded. Names without these characters are unchanged. See [Upgrading to 3.9.0](https://github.com/SagaHealthcareIT/mirthsync#upgrading-to-390) in the mirthsync README.
-  - In each target directory, push any changes made with the older plugin first. Then run one pull with “Force overwrite” and “Delete orphaned files on pull” both checked, review the result and commit it. A pull without “Force overwrite” keeps the old files next to the new ones.
-  - Update saved presets whose “Restrict to path” names an affected item to the new names. `-r` now takes only the item it names, and mirthsync warns when it matches nothing.
+  - mirthsync 3.9.0 changes some file and folder names so that a target directory works on Windows. `%`, `" * : < > ? |` and control characters are percent encoded (for example `:` becomes `%3A`), trailing dots and spaces are encoded, Windows device names such as `AUX` have their last character encoded, and names longer than 240 bytes are shortened with a hash. Other names are unchanged. See [Upgrading to 3.9.0](https://github.com/SagaHealthcareIT/mirthsync#upgrading-to-390) in the mirthsync README.
+  - Upgrade everyone who works on the same target directory or Git repository together, including CLI and VS Code extension users.
+  - In each target directory, push any changes made with the older plugin first. Then run one pull with “Force overwrite” and “Delete orphaned files on pull” both checked, “Restrict to path” empty and “Skip disabled channels” unchecked. Review the result and commit it.
+    - Without “Delete orphaned files on pull”, the old files stay next to the new ones. Without “Force overwrite”, existing XML is kept, so a renamed channel, group, template, library or alert gets a second XML file and the next push uploads both.
+    - With a restrict path or with disabled channels skipped, the orphan cleanup still deletes the old files of the items it skipped but does not write their new ones.
+  - Update “Restrict to path” values (the saved setting and any presets) that name an affected item to the new names. It now takes only the item it names, and mirthsync warns in the output when it matches nothing.
 
 - **Git Metadata & Commands**  
   - Git author/email pre-filled from the current Mirth user and cannot be toggled read-only (per design).  
